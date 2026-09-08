@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Mais de Cristo",
+    "slug": "mais-de-cristo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/images.png",
+    "splash": {
+      "image": "./assets/images.png",
+      "backgroundColor": "#0D0D0D",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.maisdecristo.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Sua localização é usada para confirmar que você está dentro da igreja ao marcar presença."
+      }
+    },
+    "android": {
+      "package": "br.com.maisdecristo.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images.png",
+        "backgroundColor": "#0D0D0D"
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Sua localização é usada para confirmar que você está dentro da igreja ao marcar presença."
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Church {
+  id           String   @id @default(uuid())
+  name         String
+  latitude     Float
+  longitude    Float
+  radiusMeters Int      @default(100)
+  createdAt    DateTime @default(now()) @map("created_at")
+  classes      Class[]
+
+  @@map("churches")
+}
+
+model Class {
+  id        String   @id @default(uuid())
+  name      String
+  church    Church?  @relation(fields: [churchId], references: [id])
+  churchId  String?  @map("church_id")
+  users     User[]
+  events    Event[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("classes")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+model User {
+  id            String      @id @default(uuid())
+  name          String
+  email         String      @unique
+  passwordHash  String      @map("password_hash")
+  role          Role        @default(STUDENT)
+  class         Class?      @relation(fields: [classId], references: [id])
+  classId       String?     @map("class_id")
+  isBlocked     Boolean     @default(false) @map("is_blocked")
+  blockedAt     DateTime?   @map("blocked_at")
+  unblockedAt   DateTime?   @map("unblocked_at")
+  unblockedBy   User?       @relation("UserUnblockedBy", fields: [unblockedById], references: [id])
+  unblockedById String?     @map("unblocked_by")
+  unblockedByRefs User[]    @relation("UserUnblockedBy")
+  attendances   Attendance[]
+  absences      Absence[]
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Event {
+  id          String       @id @default(uuid())
+  class       Class        @relation(fields: [classId], references: [id])
+  classId     String       @map("class_id")
+  name        String
+  eventDate   DateTime     @db.Date @map("event_date")
+  attendances Attendance[]
+  absences    Absence[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@unique([classId, eventDate])
+  @@map("events")
+}
+
+model Attendance {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @map("user_id")
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId     String   @map("event_id")
+  checkedInAt DateTime @default(now()) @map("checked_in_at")
+  latitude    Float
+  longitude   Float
+
+  @@unique([userId, eventId])
+  @@map("attendances")
+}
+
+model Absence {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String   @map("event_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, eventId])
+  @@map("absences")
+}
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String   @map("actor_id")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  detail    Json?    @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
